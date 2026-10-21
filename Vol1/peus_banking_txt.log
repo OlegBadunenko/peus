@@ -1,0 +1,485 @@
+-----------------------------------------------------------------------------------------------------------------------------
+      name:  peus_banking_txt
+       log:  peus_banking_txt.log
+  log type:  text
+ opened on:  16 Oct 2026, 10:38:23
+
+. 
+. log using peus_banking_smcl, replace name(peus_banking_smcl) smcl
+-----------------------------------------------------------------------------------------------------------------------------
+      name:  peus_banking_smcl
+       log:  peus_banking_smcl.smcl
+  log type:  smcl
+ opened on:  16 Oct 2026, 10:38:23
+
+. 
+. 
+. **# 2.2 Banking data
+. 
+. // cd "..."
+. 
+. use "ffiec_excerpt.dta", clear
+
+. 
+. tabulate year if year > 2009
+
+ year_index |      Freq.     Percent        Cum.
+------------+-----------------------------------
+       2010 |      1,722       20.90       20.90
+       2011 |      1,658       20.12       41.02
+       2012 |      1,652       20.05       61.08
+       2013 |      1,630       19.78       80.86
+       2014 |      1,577       19.14      100.00
+------------+-----------------------------------
+      Total |      8,239      100.00
+
+. 
+. generate double lnY1 = log(Y1)
+
+. generate double lnY2 = log(Y2)
+
+. generate double lnX1 = -log(X1)
+
+. generate double lnX2 = log(X2/X1)
+
+. generate double lnX3 = log(X3/X1)
+
+. generate double lnX4 = log(X4/X1)
+
+. 
+. generate double lnW2 = log(W2/W1)
+
+. generate double lnW3 = log(W3/W1)
+
+. generate double lnW4 = log(W4/W1)
+
+. 
+. global speBankTL "lnX1 (c.lnY1 c.lnY2 c.lnX2 c.lnX3 c.lnX4)##(c.lnY1 c.lnY2 c.lnX2 c.lnX3 c.lnX4)"
+
+. 
+. global significance_level = 0.05 // set significance level
+
+. global confidence_level = 1 - $significance_level // obtain confidence level
+
+. global critical_value = invnorm(1-$significance_level/2) // critical value at the chosen significance level
+
+. display "$critical_value"
+1.959963984540054
+
+. 
+. save "ffiec_excerpt_final.dta", replace  /* Saving dataset with modifications */ 
+(file ffiec_excerpt_final.dta not found)
+file ffiec_excerpt_final.dta saved
+
+. 
+. 
+. **# 3.7 ALS
+. 
+. use "ffiec_excerpt_final.dta", clear   /* Calling dataset with modifications */
+
+. 
+. 
+. capture frontier $speBankTL if year == 2014, distribution(exponential)
+
+. 
+. frontier $speBankTL in 1/500, distribution(exponential)
+
+Iteration 0:  Log likelihood =  489.08536  
+Iteration 1:  Log likelihood =  499.19726  
+Iteration 2:  Log likelihood =  500.04619  
+Iteration 3:  Log likelihood =  500.04945  
+Iteration 4:  Log likelihood =  500.04945  
+
+Stoc. frontier normal/exponential model               Number of obs =      500
+                                                      Wald chi2(20) = 63620.29
+Log likelihood = 500.04945                            Prob > chi2   =   0.0000
+
+-------------------------------------------------------------------------------
+         lnX1 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+         lnY1 |  -1.224051   .2189455    -5.59   0.000    -1.653176   -.7949251
+         lnY2 |   .9096431   .1862663     4.88   0.000     .5445678    1.274718
+         lnX2 |   1.297463   .4773801     2.72   0.007      .361815    2.233111
+         lnX3 |  -1.114095   .5274901    -2.11   0.035    -2.147956   -.0802334
+         lnX4 |   -.020418   .2391675    -0.09   0.932    -.4891777    .4483416
+              |
+c.lnY1#c.lnY1 |  -.0805325   .0065621   -12.27   0.000    -.0933941   -.0676709
+              |
+c.lnY1#c.lnY2 |   .1502471    .008535    17.60   0.000     .1335188    .1669753
+              |
+c.lnY1#c.lnX2 |    .091156   .0218661     4.17   0.000     .0482992    .1340129
+              |
+c.lnY1#c.lnX3 |   -.109278   .0235023    -4.65   0.000    -.1553416   -.0632143
+              |
+c.lnY1#c.lnX4 |   .0241476   .0118337     2.04   0.041     .0009539    .0473413
+              |
+c.lnY2#c.lnY2 |  -.0775293   .0044036   -17.61   0.000    -.0861602   -.0688984
+              |
+c.lnY2#c.lnX2 |  -.1391396   .0191557    -7.26   0.000    -.1766841   -.1015951
+              |
+c.lnY2#c.lnX3 |    .167521   .0212707     7.88   0.000     .1258312    .2092109
+              |
+c.lnY2#c.lnX4 |  -.0142714   .0114574    -1.25   0.213    -.0367275    .0081847
+              |
+c.lnX2#c.lnX2 |   .0486387    .038172     1.27   0.203     -.026177    .1234545
+              |
+c.lnX2#c.lnX3 |   .0437693   .0702615     0.62   0.533    -.0939406    .1814793
+              |
+c.lnX2#c.lnX4 |  -.0348997   .0303077    -1.15   0.250    -.0943017    .0245024
+              |
+c.lnX3#c.lnX3 |  -.0399201   .0434054    -0.92   0.358    -.1249931    .0451529
+              |
+c.lnX3#c.lnX4 |   .0001759   .0363508     0.00   0.996    -.0710704    .0714221
+              |
+c.lnX4#c.lnX4 |   .0112947   .0073659     1.53   0.125    -.0031423    .0257316
+              |
+        _cons |  -7.699004   2.092893    -3.68   0.000      -11.801   -3.597009
+--------------+----------------------------------------------------------------
+     /lnsig2v |   -5.69901   .1380815   -41.27   0.000    -5.969645   -5.428375
+     /lnsig2u |  -5.197183   .1684253   -30.86   0.000    -5.527291   -4.867076
+--------------+----------------------------------------------------------------
+      sigma_v |    .057873   .0039956                      .0505485    .0662588
+      sigma_u |   .0743783   .0062636                      .0630615    .0877259
+       sigma2 |   .0088814   .0007828                      .0073471    .0104157
+       lambda |   1.285199   .0090803                      1.267402    1.302996
+-------------------------------------------------------------------------------
+LR test of sigma_u=0: chibar2(01) = 66.65              Prob >= chibar2 = 0.000
+
+. frontier $speBankTL if year == 2014, distribution(exponential) from(e(b))
+
+Iteration 0:  Log likelihood = -2121.6129  (not concave)
+Iteration 1:  Log likelihood =  -1475.739  (not concave)
+Iteration 2:  Log likelihood =  -1244.842  
+Iteration 3:  Log likelihood =  217.03416  (not concave)
+Iteration 4:  Log likelihood =  824.28444  (not concave)
+Iteration 5:  Log likelihood =  1089.3929  
+Iteration 6:  Log likelihood =  1241.3712  (not concave)
+Iteration 7:  Log likelihood =  1483.1777  
+Iteration 8:  Log likelihood =  1536.6488  
+Iteration 9:  Log likelihood =  1542.2763  
+Iteration 10: Log likelihood =   1542.292  
+Iteration 11: Log likelihood =   1542.292  
+
+Stoc. frontier normal/exponential model              Number of obs =     1,577
+                                                     Wald chi2(20) = 232965.55
+Log likelihood = 1542.292                            Prob > chi2   =    0.0000
+
+-------------------------------------------------------------------------------
+         lnX1 | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+         lnY1 |  -.2971674   .0743151    -4.00   0.000    -.4428224   -.1515125
+         lnY2 |  -.3911798   .0654923    -5.97   0.000    -.5195423   -.2628174
+         lnX2 |   .6845819   .1420097     4.82   0.000      .406248    .9629157
+         lnX3 |  -.0444207   .1729204    -0.26   0.797    -.3833385    .2944972
+         lnX4 |  -.2219599    .085666    -2.59   0.010    -.3898621   -.0540578
+              |
+c.lnY1#c.lnY1 |  -.0724971   .0028947   -25.05   0.000    -.0781705   -.0668236
+              |
+c.lnY1#c.lnY2 |   .1175073   .0035796    32.83   0.000     .1104914    .1245231
+              |
+c.lnY1#c.lnX2 |  -.0027083   .0082316    -0.33   0.742    -.0188418    .0134253
+              |
+c.lnY1#c.lnX3 |   -.007206   .0092554    -0.78   0.436    -.0253462    .0109343
+              |
+c.lnY1#c.lnX4 |   .0012296   .0049585     0.25   0.804    -.0084888     .010948
+              |
+c.lnY2#c.lnY2 |  -.0557739   .0014643   -38.09   0.000    -.0586438   -.0529039
+              |
+c.lnY2#c.lnX2 |   -.001497    .006366    -0.24   0.814    -.0139742    .0109802
+              |
+c.lnY2#c.lnX3 |   .0052364   .0077417     0.68   0.499     -.009937    .0204098
+              |
+c.lnY2#c.lnX4 |   .0068046   .0042033     1.62   0.105    -.0014337    .0150429
+              |
+c.lnX2#c.lnX2 |   .0560839   .0099752     5.62   0.000     .0365328     .075635
+              |
+c.lnX2#c.lnX3 |  -.0036745   .0184772    -0.20   0.842    -.0398892    .0325401
+              |
+c.lnX2#c.lnX4 |   .0121206   .0096481     1.26   0.209    -.0067894    .0310306
+              |
+c.lnX3#c.lnX3 |  -.0059605   .0129441    -0.46   0.645    -.0313304    .0194093
+              |
+c.lnX3#c.lnX4 |   -.014429   .0130539    -1.11   0.269    -.0400142    .0111562
+              |
+c.lnX4#c.lnX4 |   .0019144   .0036311     0.53   0.598    -.0052024    .0090312
+              |
+        _cons |  -2.381153   .7899096    -3.01   0.003    -3.929347   -.8329585
+--------------+----------------------------------------------------------------
+     /lnsig2v |  -5.727915   .0719463   -79.61   0.000    -5.868927   -5.586902
+     /lnsig2u |  -5.093007   .0856064   -59.49   0.000    -5.260792   -4.925221
+--------------+----------------------------------------------------------------
+      sigma_v |   .0570426    .002052                      .0531592    .0612096
+      sigma_u |   .0783552   .0033539                      .0720499    .0852122
+       sigma2 |   .0093934   .0004686                      .0084749    .0103119
+       lambda |   1.373626   .0046574                      1.364498    1.382754
+-------------------------------------------------------------------------------
+LR test of sigma_u=0: chibar2(01) = 4.4e+02            Prob >= chibar2 = 0.000
+
+. 
+. **## Interpretation of Elasticities
+. 
+. 
+. capture drop elast*
+
+. timer on 1
+
+. margins, dydx(lnY1 lnY2 lnX2 lnX3 lnX4) generate(elast_)
+
+Average marginal effects                                 Number of obs = 1,577
+Model VCE: OIM
+
+Expression: Linear prediction, predict()
+dy/dx wrt:  lnY1 lnY2 lnX2 lnX3 lnX4
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        lnY1 |   -.722717   .0035386  -204.24   0.000    -.7296526   -.7157815
+        lnY2 |  -.2410844   .0032852   -73.38   0.000    -.2475233   -.2346455
+        lnX2 |   .8166292   .0071613   114.03   0.000     .8025934     .830665
+        lnX3 |   .0287598   .0078279     3.67   0.000     .0134175    .0441021
+        lnX4 |   -.030139    .004444    -6.78   0.000     -.038849    -.021429
+------------------------------------------------------------------------------
+
+. timer off 1
+
+. generate double elast_Y1 = -elast_1
+(6,662 missing values generated)
+
+. generate double elast_Y2 = -elast_2
+(6,662 missing values generated)
+
+. clonevar elast_X2 = elast_3
+(6,662 missing values generated)
+
+. clonevar elast_X3 = elast_4
+(6,662 missing values generated)
+
+. clonevar elast_X4 = elast_5
+(6,662 missing values generated)
+
+. generate double elast_X1 = 1 - elast_X2 - elast_X3 - elast_X4
+(6,662 missing values generated)
+
+. // generate double elast_X1 = 1 - elast_X2 - elast_X3
+. summarize elast_Y* elast_X*
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    elast_Y1 |      1,577     .722717     .121999   .2231594   1.301317
+    elast_Y2 |      1,577    .2410844     .107797  -.2876883   .6620186
+    elast_X2 |      1,577    .8166292    .0830182   .4099603   1.281195
+    elast_X3 |      1,577    .0287598    .0228176  -.0665431    .135357
+    elast_X4 |      1,577    -.030139    .0101073  -.0664057   .0029347
+-------------+---------------------------------------------------------
+    elast_X1 |      1,577      .18475    .0686076  -.2136512   .5210883
+
+. 
+. capture drop rts
+
+. generate double rts = 1/(elast_Y1+elast_Y2)
+(6,662 missing values generated)
+
+. summarize elast_Y* elast_X* rts
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    elast_Y1 |      1,577     .722717     .121999   .2231594   1.301317
+    elast_Y2 |      1,577    .2410844     .107797  -.2876883   .6620186
+    elast_X2 |      1,577    .8166292    .0830182   .4099603   1.281195
+    elast_X3 |      1,577    .0287598    .0228176  -.0665431    .135357
+    elast_X4 |      1,577    -.030139    .0101073  -.0664057   .0029347
+-------------+---------------------------------------------------------
+    elast_X1 |      1,577      .18475    .0686076  -.2136512   .5210883
+         rts |      1,577    1.038153    .0247121   .9531643   1.129716
+
+. 
+. tabstat elast_Y* elast_X* rts, format(%10.3fc)  ///
+>         statistics(n min p10 p50 p90 max) columns(statistics)
+
+    Variable |          N        Min        p10        p50        p90        Max
+-------------+------------------------------------------------------------------
+    elast_Y1 |  1,577.000      0.223      0.579      0.717      0.869      1.301
+    elast_Y2 |  1,577.000     -0.288      0.113      0.248      0.367      0.662
+    elast_X2 |  1,577.000      0.410      0.715      0.813      0.922      1.281
+    elast_X3 |  1,577.000     -0.067      0.001      0.029      0.058      0.135
+    elast_X4 |  1,577.000     -0.066     -0.042     -0.031     -0.017      0.003
+    elast_X1 |  1,577.000     -0.214      0.100      0.187      0.270      0.521
+         rts |  1,577.000      0.953      1.004      1.041      1.067      1.130
+--------------------------------------------------------------------------------
+
+.         
+.         
+. 
+. **## RTS manually
+. 
+. * Extract coefficient names from e(b)
+. matrix b = e(b)
+
+. local allvars : colnames b
+
+. 
+. * Initialize locals
+. local dlnY1
+
+. local dlnY2
+
+. 
+. foreach var of local allvars {
+  2.     * lnY1 terms
+.     if strpos("`var'", "lnY1") {
+  3.         if strpos("`var'", "#") {
+  4.             local left = substr("`var'", 1, strpos("`var'", "#") - 1)
+  5.             local right = substr("`var'", strpos("`var'", "#") + 1, .)
+  6. 
+.             if "`left'" == "c.lnY1" & "`right'" == "c.lnY1" {
+  7.                 local dlnY1 `dlnY1' + 2*_b[`var']*lnY1
+  8.             }
+  9.             else if "`left'" == "c.lnY1" {
+ 10.                 local other = subinstr("`right'", "c.", "", .)
+ 11.                 local dlnY1 `dlnY1' + _b[`var']*`other'
+ 12.             }
+ 13.             else if "`right'" == "c.lnY1" {
+ 14.                 local other = subinstr("`left'", "c.", "", .)
+ 15.                 local dlnY1 `dlnY1' + _b[`var']*`other'
+ 16.             }
+ 17.         }
+ 18.         else if "`var'" == "lnY1" {
+ 19.             local dlnY1 `dlnY1' + _b[`var']
+ 20.         }
+ 21.     }
+ 22. 
+.     * lnY2 terms
+.     if strpos("`var'", "lnY2") {
+ 23.         if strpos("`var'", "#") {
+ 24.             local left = substr("`var'", 1, strpos("`var'", "#") - 1)
+ 25.             local right = substr("`var'", strpos("`var'", "#") + 1, .)
+ 26. 
+.             if "`left'" == "c.lnY2" & "`right'" == "c.lnY2" {
+ 27.                 local dlnY2 `dlnY2' + 2*_b[`var']*lnY2
+ 28.             }
+ 29.             else if "`left'" == "c.lnY2" {
+ 30.                 local other = subinstr("`right'", "c.", "", .)
+ 31.                 local dlnY2 `dlnY2' + _b[`var']*`other'
+ 32.             }
+ 33.             else if "`right'" == "c.lnY2" {
+ 34.                 local other = subinstr("`left'", "c.", "", .)
+ 35.                 local dlnY2 `dlnY2' + _b[`var']*`other'
+ 36.             }
+ 37.         }
+ 38.         else if "`var'" == "lnY2" {
+ 39.             local dlnY2 `dlnY2' + _b[`var']
+ 40.         }
+ 41.     }
+ 42. }
+
+. 
+. 
+. * Display the results
+. display "Marginal effect of lnY1: `dlnY1'"
+Marginal effect of lnY1: + _b[lnY1] + 2*_b[c.lnY1#c.lnY1]*lnY1 + _b[c.lnY1#c.lnY2]*lnY2 + _b[c.lnY1#c.lnX2]*lnX2 + _b[c.lnY1#
+> c.lnX3]*lnX3 + _b[c.lnY1#c.lnX4]*lnX4
+
+. display "Marginal effect of lnY2: `dlnY2'"
+Marginal effect of lnY2: + _b[lnY2] + _b[c.lnY1#c.lnY2]*lnY1 + 2*_b[c.lnY2#c.lnY2]*lnY2 + _b[c.lnY2#c.lnX2]*lnX2 + _b[c.lnY2#
+> c.lnX3]*lnX3 + _b[c.lnY2#c.lnX4]*lnX4
+
+. 
+. 
+. * Temporarily store the expression
+. local temp1 = "`dlnY1'"
+
+. local temp2 = "`dlnY2'"
+
+. 
+. * Remove the first "+ " manually
+. if substr("`temp1'", 1, 2) == "+ " {
+.     local dlnY1 = substr("`temp1'", 3, .)
+. }
+
+. if substr("`temp2'", 1, 2) == "+ " {
+.     local dlnY2 = substr("`temp2'", 3, .)
+. }
+
+. 
+. * Display the results
+. display "Marginal effect of lnY1: `dlnY1'"
+Marginal effect of lnY1: _b[lnY1] + 2*_b[c.lnY1#c.lnY1]*lnY1 + _b[c.lnY1#c.lnY2]*lnY2 + _b[c.lnY1#c.lnX2]*lnX2 + _b[c.lnY1#c.
+> lnX3]*lnX3 + _b[c.lnY1#c.lnX4]*lnX4
+
+. display "Marginal effect of lnY2: `dlnY2'"
+Marginal effect of lnY2: _b[lnY2] + _b[c.lnY1#c.lnY2]*lnY1 + 2*_b[c.lnY2#c.lnY2]*lnY2 + _b[c.lnY2#c.lnX2]*lnX2 + _b[c.lnY2#c.
+> lnX3]*lnX3 + _b[c.lnY2#c.lnX4]*lnX4
+
+. 
+. 
+. generate elast_Y1_manual = -(`dlnY1') if e(sample)
+(6,662 missing values generated)
+
+. generate elast_Y2_manual = -(`dlnY2') if e(sample)
+(6,662 missing values generated)
+
+. 
+. local RTS_expr = "- 1 / ((`dlnY1') + (`dlnY2'))"
+
+. 
+. predictnl rts_manual = `RTS_expr' if e(sample), se(rts_se)
+(6,662 missing values generated)
+
+. 
+. summarize elast_Y1_manual elast_Y1 elast_Y2_manual elast_Y2 rts_manual rts
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+elast_Y1_m~l |      1,577     .722717     .121999   .2231594   1.301317
+    elast_Y1 |      1,577     .722717     .121999   .2231594   1.301317
+elast_Y2_m~l |      1,577    .2410844     .107797  -.2876883   .6620186
+    elast_Y2 |      1,577    .2410844     .107797  -.2876883   .6620186
+  rts_manual |      1,577    1.038153    .0247121   .9531643   1.129716
+-------------+---------------------------------------------------------
+         rts |      1,577    1.038153    .0247121   .9531643   1.129716
+
+. 
+. generate rts_lb = rts - ${critical_value} * rts_se  if e(sample)
+(6,662 missing values generated)
+
+. generate rts_ub = rts + ${critical_value} * rts_se if e(sample)
+(6,662 missing values generated)
+
+. generate scale = "" if e(sample)
+(8,239 missing values generated)
+
+. 
+. replace scale = "Economies of Scale" if rts_lb > 1 & e(sample)
+variable scale was str1 now str18
+(1,315 real changes made)
+
+. replace scale = "Diseconomies of Scale" if rts_ub < 1 & e(sample)
+variable scale was str18 now str21
+(38 real changes made)
+
+. replace scale = "Optimal Scale" if rts_lb < 1 & rts_ub > 1 & e(sample)
+(224 real changes made)
+
+. 
+. tabulate scale
+
+                scale |      Freq.     Percent        Cum.
+----------------------+-----------------------------------
+Diseconomies of Scale |         38        2.41        2.41
+   Economies of Scale |      1,315       83.39       85.80
+        Optimal Scale |        224       14.20      100.00
+----------------------+-----------------------------------
+                Total |      1,577      100.00
+
+. 
+. erase "ffiec_excerpt_final.dta"
+
+. 
+. log close peus_banking_txt
+      name:  peus_banking_txt
+       log:  peus_banking_txt.log
+  log type:  text
+ closed on:  16 Oct 2026, 10:38:24
+-----------------------------------------------------------------------------------------------------------------------------

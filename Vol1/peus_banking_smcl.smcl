@@ -1,0 +1,508 @@
+{smcl}
+{com}{sf}{ul off}{txt}{.-}
+      name:  {res}peus_banking_smcl
+       {txt}log:  {res}peus_banking_smcl.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res}16 Oct 2026, 10:38:23
+{txt}
+{com}. 
+. 
+. **# 2.2 Banking data
+. 
+. // cd "..."
+. 
+. use "ffiec_excerpt.dta", clear
+{txt}
+{com}. 
+. tabulate year if year > 2009
+
+ {txt}year_index {c |}      Freq.     Percent        Cum.
+{hline 12}{c +}{hline 35}
+       2010 {c |}{res}      1,722       20.90       20.90
+{txt}       2011 {c |}{res}      1,658       20.12       41.02
+{txt}       2012 {c |}{res}      1,652       20.05       61.08
+{txt}       2013 {c |}{res}      1,630       19.78       80.86
+{txt}       2014 {c |}{res}      1,577       19.14      100.00
+{txt}{hline 12}{c +}{hline 35}
+      Total {c |}{res}      8,239      100.00
+{txt}
+{com}. 
+. generate double lnY1 = log(Y1)
+{txt}
+{com}. generate double lnY2 = log(Y2)
+{txt}
+{com}. generate double lnX1 = -log(X1)
+{txt}
+{com}. generate double lnX2 = log(X2/X1)
+{txt}
+{com}. generate double lnX3 = log(X3/X1)
+{txt}
+{com}. generate double lnX4 = log(X4/X1)
+{txt}
+{com}. 
+. generate double lnW2 = log(W2/W1)
+{txt}
+{com}. generate double lnW3 = log(W3/W1)
+{txt}
+{com}. generate double lnW4 = log(W4/W1)
+{txt}
+{com}. 
+. global speBankTL "lnX1 (c.lnY1 c.lnY2 c.lnX2 c.lnX3 c.lnX4)##(c.lnY1 c.lnY2 c.lnX2 c.lnX3 c.lnX4)"
+{txt}
+{com}. 
+. global significance_level = 0.05 // set significance level
+{txt}
+{com}. global confidence_level = 1 - $significance_level // obtain confidence level
+{txt}
+{com}. global critical_value = invnorm(1-$significance_level/2) // critical value at the chosen significance level
+{txt}
+{com}. display "$critical_value"
+{res}1.959963984540054
+{txt}
+{com}. 
+. save "ffiec_excerpt_final.dta", replace  /* Saving dataset with modifications */ 
+{txt}{p 0 4 2}
+(file {bf}
+ffiec_excerpt_final.dta{rm}
+not found)
+{p_end}
+{p 0 4 2}
+file {bf}
+ffiec_excerpt_final.dta{rm}
+saved
+{p_end}
+
+{com}. 
+. 
+. **# 3.7 ALS
+. 
+. use "ffiec_excerpt_final.dta", clear   /* Calling dataset with modifications */
+{txt}
+{com}. 
+. 
+. capture frontier $speBankTL if year == 2014, distribution(exponential)
+{txt}
+{com}. 
+. frontier $speBankTL in 1/500, distribution(exponential)
+{res}
+{txt}Iteration 0:{space 2}Log likelihood = {res: 489.08536}  
+Iteration 1:{space 2}Log likelihood = {res: 499.19726}  
+Iteration 2:{space 2}Log likelihood = {res: 500.04619}  
+Iteration 3:{space 2}Log likelihood = {res: 500.04945}  
+Iteration 4:{space 2}Log likelihood = {res: 500.04945}  
+{res}
+{txt}{col 1}Stoc. frontier normal/exponential model{col 55}{lalign 13:Number of obs}{col 68} = {res}{ralign 8:500}
+{txt}{col 55}{lalign 13:Wald chi2({res:20})}{col 68} = {res}{ralign 8:63620.29}
+{txt}{col 1}{lalign 14:Log likelihood}{col 15} = {res}{ralign 9:500.04945}{txt}{col 55}{lalign 13:Prob > chi2}{col 68} = {res}{ralign 8:0.0000}
+
+{txt}{hline 14}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}         lnX1{col 15}{c |} Coefficient{col 27}  Std. err.{col 39}      z{col 47}   P>|z|{col 55}     [95% con{col 68}f. interval]
+{hline 14}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 9}lnY1 {c |}{col 15}{res}{space 2}-1.224051{col 27}{space 2} .2189455{col 38}{space 1}   -5.59{col 47}{space 3}0.000{col 55}{space 4}-1.653176{col 68}{space 3}-.7949251
+{txt}{space 9}lnY2 {c |}{col 15}{res}{space 2} .9096431{col 27}{space 2} .1862663{col 38}{space 1}    4.88{col 47}{space 3}0.000{col 55}{space 4} .5445678{col 68}{space 3} 1.274718
+{txt}{space 9}lnX2 {c |}{col 15}{res}{space 2} 1.297463{col 27}{space 2} .4773801{col 38}{space 1}    2.72{col 47}{space 3}0.007{col 55}{space 4}  .361815{col 68}{space 3} 2.233111
+{txt}{space 9}lnX3 {c |}{col 15}{res}{space 2}-1.114095{col 27}{space 2} .5274901{col 38}{space 1}   -2.11{col 47}{space 3}0.035{col 55}{space 4}-2.147956{col 68}{space 3}-.0802334
+{txt}{space 9}lnX4 {c |}{col 15}{res}{space 2} -.020418{col 27}{space 2} .2391675{col 38}{space 1}   -0.09{col 47}{space 3}0.932{col 55}{space 4}-.4891777{col 68}{space 3} .4483416
+{txt}{space 13} {c |}
+c.lnY1#c.lnY1 {c |}{col 15}{res}{space 2}-.0805325{col 27}{space 2} .0065621{col 38}{space 1}  -12.27{col 47}{space 3}0.000{col 55}{space 4}-.0933941{col 68}{space 3}-.0676709
+{txt}{space 13} {c |}
+c.lnY1#c.lnY2 {c |}{col 15}{res}{space 2} .1502471{col 27}{space 2}  .008535{col 38}{space 1}   17.60{col 47}{space 3}0.000{col 55}{space 4} .1335188{col 68}{space 3} .1669753
+{txt}{space 13} {c |}
+c.lnY1#c.lnX2 {c |}{col 15}{res}{space 2}  .091156{col 27}{space 2} .0218661{col 38}{space 1}    4.17{col 47}{space 3}0.000{col 55}{space 4} .0482992{col 68}{space 3} .1340129
+{txt}{space 13} {c |}
+c.lnY1#c.lnX3 {c |}{col 15}{res}{space 2} -.109278{col 27}{space 2} .0235023{col 38}{space 1}   -4.65{col 47}{space 3}0.000{col 55}{space 4}-.1553416{col 68}{space 3}-.0632143
+{txt}{space 13} {c |}
+c.lnY1#c.lnX4 {c |}{col 15}{res}{space 2} .0241476{col 27}{space 2} .0118337{col 38}{space 1}    2.04{col 47}{space 3}0.041{col 55}{space 4} .0009539{col 68}{space 3} .0473413
+{txt}{space 13} {c |}
+c.lnY2#c.lnY2 {c |}{col 15}{res}{space 2}-.0775293{col 27}{space 2} .0044036{col 38}{space 1}  -17.61{col 47}{space 3}0.000{col 55}{space 4}-.0861602{col 68}{space 3}-.0688984
+{txt}{space 13} {c |}
+c.lnY2#c.lnX2 {c |}{col 15}{res}{space 2}-.1391396{col 27}{space 2} .0191557{col 38}{space 1}   -7.26{col 47}{space 3}0.000{col 55}{space 4}-.1766841{col 68}{space 3}-.1015951
+{txt}{space 13} {c |}
+c.lnY2#c.lnX3 {c |}{col 15}{res}{space 2}  .167521{col 27}{space 2} .0212707{col 38}{space 1}    7.88{col 47}{space 3}0.000{col 55}{space 4} .1258312{col 68}{space 3} .2092109
+{txt}{space 13} {c |}
+c.lnY2#c.lnX4 {c |}{col 15}{res}{space 2}-.0142714{col 27}{space 2} .0114574{col 38}{space 1}   -1.25{col 47}{space 3}0.213{col 55}{space 4}-.0367275{col 68}{space 3} .0081847
+{txt}{space 13} {c |}
+c.lnX2#c.lnX2 {c |}{col 15}{res}{space 2} .0486387{col 27}{space 2}  .038172{col 38}{space 1}    1.27{col 47}{space 3}0.203{col 55}{space 4} -.026177{col 68}{space 3} .1234545
+{txt}{space 13} {c |}
+c.lnX2#c.lnX3 {c |}{col 15}{res}{space 2} .0437693{col 27}{space 2} .0702615{col 38}{space 1}    0.62{col 47}{space 3}0.533{col 55}{space 4}-.0939406{col 68}{space 3} .1814793
+{txt}{space 13} {c |}
+c.lnX2#c.lnX4 {c |}{col 15}{res}{space 2}-.0348997{col 27}{space 2} .0303077{col 38}{space 1}   -1.15{col 47}{space 3}0.250{col 55}{space 4}-.0943017{col 68}{space 3} .0245024
+{txt}{space 13} {c |}
+c.lnX3#c.lnX3 {c |}{col 15}{res}{space 2}-.0399201{col 27}{space 2} .0434054{col 38}{space 1}   -0.92{col 47}{space 3}0.358{col 55}{space 4}-.1249931{col 68}{space 3} .0451529
+{txt}{space 13} {c |}
+c.lnX3#c.lnX4 {c |}{col 15}{res}{space 2} .0001759{col 27}{space 2} .0363508{col 38}{space 1}    0.00{col 47}{space 3}0.996{col 55}{space 4}-.0710704{col 68}{space 3} .0714221
+{txt}{space 13} {c |}
+c.lnX4#c.lnX4 {c |}{col 15}{res}{space 2} .0112947{col 27}{space 2} .0073659{col 38}{space 1}    1.53{col 47}{space 3}0.125{col 55}{space 4}-.0031423{col 68}{space 3} .0257316
+{txt}{space 13} {c |}
+{space 8}_cons {c |}{col 15}{res}{space 2}-7.699004{col 27}{space 2} 2.092893{col 38}{space 1}   -3.68{col 47}{space 3}0.000{col 55}{space 4}  -11.801{col 68}{space 3}-3.597009
+{txt}{hline 14}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+     /lnsig2v {c |}{col 15}{res}{space 2} -5.69901{col 27}{space 2} .1380815{col 38}{space 1}  -41.27{col 47}{space 3}0.000{col 55}{space 4}-5.969645{col 68}{space 3}-5.428375
+{txt}     /lnsig2u {c |}{col 15}{res}{space 2}-5.197183{col 27}{space 2} .1684253{col 38}{space 1}  -30.86{col 47}{space 3}0.000{col 55}{space 4}-5.527291{col 68}{space 3}-4.867076
+{txt}{hline 14}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+      sigma_v {c |}{col 15}{res}{space 2}  .057873{col 27}{space 2} .0039956{col 55}{space 4} .0505485{col 68}{space 3} .0662588
+{txt}      sigma_u {c |}{col 15}{res}{space 2} .0743783{col 27}{space 2} .0062636{col 55}{space 4} .0630615{col 68}{space 3} .0877259
+{txt}       sigma2 {c |}{col 15}{res}{space 2} .0088814{col 27}{space 2} .0007828{col 55}{space 4} .0073471{col 68}{space 3} .0104157
+{txt}       lambda {c |}{col 15}{res}{space 2} 1.285199{col 27}{space 2} .0090803{col 55}{space 4} 1.267402{col 68}{space 3} 1.302996
+{txt}{hline 14}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+LR test of sigma_u=0: {help j_chibar##|_new:chibar2(01) = }{res}66.65{col 56}{txt}Prob >= chibar2 = {res}0.000
+{txt}
+{com}. frontier $speBankTL if year == 2014, distribution(exponential) from(e(b))
+{res}
+{txt}Iteration 0:{space 2}Log likelihood = {res:-2121.6129}  (not concave)
+Iteration 1:{space 2}Log likelihood = {res: -1475.739}  (not concave)
+Iteration 2:{space 2}Log likelihood = {res: -1244.842}  
+Iteration 3:{space 2}Log likelihood = {res: 217.03416}  (not concave)
+Iteration 4:{space 2}Log likelihood = {res: 824.28444}  (not concave)
+Iteration 5:{space 2}Log likelihood = {res: 1089.3929}  
+Iteration 6:{space 2}Log likelihood = {res: 1241.3712}  (not concave)
+Iteration 7:{space 2}Log likelihood = {res: 1483.1777}  
+Iteration 8:{space 2}Log likelihood = {res: 1536.6488}  
+Iteration 9:{space 2}Log likelihood = {res: 1542.2763}  
+Iteration 10:{space 1}Log likelihood = {res:  1542.292}  
+Iteration 11:{space 1}Log likelihood = {res:  1542.292}  
+{res}
+{txt}{col 1}Stoc. frontier normal/exponential model{col 54}{lalign 13:Number of obs}{col 67} = {res}{ralign 9:1,577}
+{txt}{col 54}{lalign 13:Wald chi2({res:20})}{col 67} = {res}{ralign 9:232965.55}
+{txt}{col 1}{lalign 14:Log likelihood}{col 15} = {res}{ralign 8:1542.292}{txt}{col 54}{lalign 13:Prob > chi2}{col 67} = {res}{ralign 9:0.0000}
+
+{txt}{hline 14}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}         lnX1{col 15}{c |} Coefficient{col 27}  Std. err.{col 39}      z{col 47}   P>|z|{col 55}     [95% con{col 68}f. interval]
+{hline 14}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 9}lnY1 {c |}{col 15}{res}{space 2}-.2971674{col 27}{space 2} .0743151{col 38}{space 1}   -4.00{col 47}{space 3}0.000{col 55}{space 4}-.4428224{col 68}{space 3}-.1515125
+{txt}{space 9}lnY2 {c |}{col 15}{res}{space 2}-.3911798{col 27}{space 2} .0654923{col 38}{space 1}   -5.97{col 47}{space 3}0.000{col 55}{space 4}-.5195423{col 68}{space 3}-.2628174
+{txt}{space 9}lnX2 {c |}{col 15}{res}{space 2} .6845819{col 27}{space 2} .1420097{col 38}{space 1}    4.82{col 47}{space 3}0.000{col 55}{space 4}  .406248{col 68}{space 3} .9629157
+{txt}{space 9}lnX3 {c |}{col 15}{res}{space 2}-.0444207{col 27}{space 2} .1729204{col 38}{space 1}   -0.26{col 47}{space 3}0.797{col 55}{space 4}-.3833385{col 68}{space 3} .2944972
+{txt}{space 9}lnX4 {c |}{col 15}{res}{space 2}-.2219599{col 27}{space 2}  .085666{col 38}{space 1}   -2.59{col 47}{space 3}0.010{col 55}{space 4}-.3898621{col 68}{space 3}-.0540578
+{txt}{space 13} {c |}
+c.lnY1#c.lnY1 {c |}{col 15}{res}{space 2}-.0724971{col 27}{space 2} .0028947{col 38}{space 1}  -25.05{col 47}{space 3}0.000{col 55}{space 4}-.0781705{col 68}{space 3}-.0668236
+{txt}{space 13} {c |}
+c.lnY1#c.lnY2 {c |}{col 15}{res}{space 2} .1175073{col 27}{space 2} .0035796{col 38}{space 1}   32.83{col 47}{space 3}0.000{col 55}{space 4} .1104914{col 68}{space 3} .1245231
+{txt}{space 13} {c |}
+c.lnY1#c.lnX2 {c |}{col 15}{res}{space 2}-.0027083{col 27}{space 2} .0082316{col 38}{space 1}   -0.33{col 47}{space 3}0.742{col 55}{space 4}-.0188418{col 68}{space 3} .0134253
+{txt}{space 13} {c |}
+c.lnY1#c.lnX3 {c |}{col 15}{res}{space 2} -.007206{col 27}{space 2} .0092554{col 38}{space 1}   -0.78{col 47}{space 3}0.436{col 55}{space 4}-.0253462{col 68}{space 3} .0109343
+{txt}{space 13} {c |}
+c.lnY1#c.lnX4 {c |}{col 15}{res}{space 2} .0012296{col 27}{space 2} .0049585{col 38}{space 1}    0.25{col 47}{space 3}0.804{col 55}{space 4}-.0084888{col 68}{space 3}  .010948
+{txt}{space 13} {c |}
+c.lnY2#c.lnY2 {c |}{col 15}{res}{space 2}-.0557739{col 27}{space 2} .0014643{col 38}{space 1}  -38.09{col 47}{space 3}0.000{col 55}{space 4}-.0586438{col 68}{space 3}-.0529039
+{txt}{space 13} {c |}
+c.lnY2#c.lnX2 {c |}{col 15}{res}{space 2} -.001497{col 27}{space 2}  .006366{col 38}{space 1}   -0.24{col 47}{space 3}0.814{col 55}{space 4}-.0139742{col 68}{space 3} .0109802
+{txt}{space 13} {c |}
+c.lnY2#c.lnX3 {c |}{col 15}{res}{space 2} .0052364{col 27}{space 2} .0077417{col 38}{space 1}    0.68{col 47}{space 3}0.499{col 55}{space 4} -.009937{col 68}{space 3} .0204098
+{txt}{space 13} {c |}
+c.lnY2#c.lnX4 {c |}{col 15}{res}{space 2} .0068046{col 27}{space 2} .0042033{col 38}{space 1}    1.62{col 47}{space 3}0.105{col 55}{space 4}-.0014337{col 68}{space 3} .0150429
+{txt}{space 13} {c |}
+c.lnX2#c.lnX2 {c |}{col 15}{res}{space 2} .0560839{col 27}{space 2} .0099752{col 38}{space 1}    5.62{col 47}{space 3}0.000{col 55}{space 4} .0365328{col 68}{space 3}  .075635
+{txt}{space 13} {c |}
+c.lnX2#c.lnX3 {c |}{col 15}{res}{space 2}-.0036745{col 27}{space 2} .0184772{col 38}{space 1}   -0.20{col 47}{space 3}0.842{col 55}{space 4}-.0398892{col 68}{space 3} .0325401
+{txt}{space 13} {c |}
+c.lnX2#c.lnX4 {c |}{col 15}{res}{space 2} .0121206{col 27}{space 2} .0096481{col 38}{space 1}    1.26{col 47}{space 3}0.209{col 55}{space 4}-.0067894{col 68}{space 3} .0310306
+{txt}{space 13} {c |}
+c.lnX3#c.lnX3 {c |}{col 15}{res}{space 2}-.0059605{col 27}{space 2} .0129441{col 38}{space 1}   -0.46{col 47}{space 3}0.645{col 55}{space 4}-.0313304{col 68}{space 3} .0194093
+{txt}{space 13} {c |}
+c.lnX3#c.lnX4 {c |}{col 15}{res}{space 2} -.014429{col 27}{space 2} .0130539{col 38}{space 1}   -1.11{col 47}{space 3}0.269{col 55}{space 4}-.0400142{col 68}{space 3} .0111562
+{txt}{space 13} {c |}
+c.lnX4#c.lnX4 {c |}{col 15}{res}{space 2} .0019144{col 27}{space 2} .0036311{col 38}{space 1}    0.53{col 47}{space 3}0.598{col 55}{space 4}-.0052024{col 68}{space 3} .0090312
+{txt}{space 13} {c |}
+{space 8}_cons {c |}{col 15}{res}{space 2}-2.381153{col 27}{space 2} .7899096{col 38}{space 1}   -3.01{col 47}{space 3}0.003{col 55}{space 4}-3.929347{col 68}{space 3}-.8329585
+{txt}{hline 14}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+     /lnsig2v {c |}{col 15}{res}{space 2}-5.727915{col 27}{space 2} .0719463{col 38}{space 1}  -79.61{col 47}{space 3}0.000{col 55}{space 4}-5.868927{col 68}{space 3}-5.586902
+{txt}     /lnsig2u {c |}{col 15}{res}{space 2}-5.093007{col 27}{space 2} .0856064{col 38}{space 1}  -59.49{col 47}{space 3}0.000{col 55}{space 4}-5.260792{col 68}{space 3}-4.925221
+{txt}{hline 14}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+      sigma_v {c |}{col 15}{res}{space 2} .0570426{col 27}{space 2}  .002052{col 55}{space 4} .0531592{col 68}{space 3} .0612096
+{txt}      sigma_u {c |}{col 15}{res}{space 2} .0783552{col 27}{space 2} .0033539{col 55}{space 4} .0720499{col 68}{space 3} .0852122
+{txt}       sigma2 {c |}{col 15}{res}{space 2} .0093934{col 27}{space 2} .0004686{col 55}{space 4} .0084749{col 68}{space 3} .0103119
+{txt}       lambda {c |}{col 15}{res}{space 2} 1.373626{col 27}{space 2} .0046574{col 55}{space 4} 1.364498{col 68}{space 3} 1.382754
+{txt}{hline 14}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+LR test of sigma_u=0: {help j_chibar##|_new:chibar2(01) = }{res}4.4e+02{col 56}{txt}Prob >= chibar2 = {res}0.000
+{txt}
+{com}. 
+. **## Interpretation of Elasticities
+. 
+. 
+. capture drop elast*
+{txt}
+{com}. timer on 1
+{txt}
+{com}. margins, dydx(lnY1 lnY2 lnX2 lnX3 lnX4) generate(elast_)
+{res}
+{txt}{col 1}Average marginal effects{col 58}{lalign 13:Number of obs}{col 71} = {res}{ralign 5:1,577}
+{txt}{col 1}Model VCE: {res:OIM}
+
+{txt}{p2colset 1 13 13 2}{...}
+{p2col:Expression:}{res:Linear prediction, predict()}{p_end}
+{p2col:dy/dx wrt:}{res:lnY1 lnY2 lnX2 lnX3 lnX4}{p_end}
+{p2colreset}{...}
+
+{res}{txt}{hline 13}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 14}{c |}{col 26} Delta-method
+{col 14}{c |}      dy/dx{col 26}   std. err.{col 38}      z{col 46}   P>|z|{col 54}     [95% con{col 67}f. interval]
+{hline 13}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 8}lnY1 {c |}{col 14}{res}{space 2} -.722717{col 26}{space 2} .0035386{col 37}{space 1} -204.24{col 46}{space 3}0.000{col 54}{space 4}-.7296526{col 67}{space 3}-.7157815
+{txt}{space 8}lnY2 {c |}{col 14}{res}{space 2}-.2410844{col 26}{space 2} .0032852{col 37}{space 1}  -73.38{col 46}{space 3}0.000{col 54}{space 4}-.2475233{col 67}{space 3}-.2346455
+{txt}{space 8}lnX2 {c |}{col 14}{res}{space 2} .8166292{col 26}{space 2} .0071613{col 37}{space 1}  114.03{col 46}{space 3}0.000{col 54}{space 4} .8025934{col 67}{space 3}  .830665
+{txt}{space 8}lnX3 {c |}{col 14}{res}{space 2} .0287598{col 26}{space 2} .0078279{col 37}{space 1}    3.67{col 46}{space 3}0.000{col 54}{space 4} .0134175{col 67}{space 3} .0441021
+{txt}{space 8}lnX4 {c |}{col 14}{res}{space 2} -.030139{col 26}{space 2}  .004444{col 37}{space 1}   -6.78{col 46}{space 3}0.000{col 54}{space 4} -.038849{col 67}{space 3} -.021429
+{txt}{hline 13}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}{txt}
+{com}. timer off 1
+{txt}
+{com}. generate double elast_Y1 = -elast_1
+{txt}(6,662 missing values generated)
+
+{com}. generate double elast_Y2 = -elast_2
+{txt}(6,662 missing values generated)
+
+{com}. clonevar elast_X2 = elast_3
+{txt}(6,662 missing values generated)
+
+{com}. clonevar elast_X3 = elast_4
+{txt}(6,662 missing values generated)
+
+{com}. clonevar elast_X4 = elast_5
+{txt}(6,662 missing values generated)
+
+{com}. generate double elast_X1 = 1 - elast_X2 - elast_X3 - elast_X4
+{txt}(6,662 missing values generated)
+
+{com}. // generate double elast_X1 = 1 - elast_X2 - elast_X3
+. summarize elast_Y* elast_X*
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 4}elast_Y1 {c |}{res}      1,577     .722717     .121999   .2231594   1.301317
+{txt}{space 4}elast_Y2 {c |}{res}      1,577    .2410844     .107797  -.2876883   .6620186
+{txt}{space 4}elast_X2 {c |}{res}      1,577    .8166292    .0830182   .4099603   1.281195
+{txt}{space 4}elast_X3 {c |}{res}      1,577    .0287598    .0228176  -.0665431    .135357
+{txt}{space 4}elast_X4 {c |}{res}      1,577    -.030139    .0101073  -.0664057   .0029347
+{txt}{hline 13}{c +}{hline 57}
+{space 4}elast_X1 {c |}{res}      1,577      .18475    .0686076  -.2136512   .5210883
+{txt}
+{com}. 
+. capture drop rts
+{txt}
+{com}. generate double rts = 1/(elast_Y1+elast_Y2)
+{txt}(6,662 missing values generated)
+
+{com}. summarize elast_Y* elast_X* rts
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 4}elast_Y1 {c |}{res}      1,577     .722717     .121999   .2231594   1.301317
+{txt}{space 4}elast_Y2 {c |}{res}      1,577    .2410844     .107797  -.2876883   .6620186
+{txt}{space 4}elast_X2 {c |}{res}      1,577    .8166292    .0830182   .4099603   1.281195
+{txt}{space 4}elast_X3 {c |}{res}      1,577    .0287598    .0228176  -.0665431    .135357
+{txt}{space 4}elast_X4 {c |}{res}      1,577    -.030139    .0101073  -.0664057   .0029347
+{txt}{hline 13}{c +}{hline 57}
+{space 4}elast_X1 {c |}{res}      1,577      .18475    .0686076  -.2136512   .5210883
+{txt}{space 9}rts {c |}{res}      1,577    1.038153    .0247121   .9531643   1.129716
+{txt}
+{com}. 
+. tabstat elast_Y* elast_X* rts, format(%10.3fc)  ///
+>         statistics(n min p10 p50 p90 max) columns(statistics)
+
+{txt}{ralign 12:Variable} {...}
+{c |}          N        Min        p10        p50        p90        Max
+{hline 13}{c +}{hline 66}
+{ralign 12:elast_Y1} {...}
+{c |}{...}
+ {res} 1,577.000      0.223      0.579      0.717      0.869      1.301
+{txt}{ralign 12:elast_Y2} {...}
+{c |}{...}
+ {res} 1,577.000     -0.288      0.113      0.248      0.367      0.662
+{txt}{ralign 12:elast_X2} {...}
+{c |}{...}
+ {res} 1,577.000      0.410      0.715      0.813      0.922      1.281
+{txt}{ralign 12:elast_X3} {...}
+{c |}{...}
+ {res} 1,577.000     -0.067      0.001      0.029      0.058      0.135
+{txt}{ralign 12:elast_X4} {...}
+{c |}{...}
+ {res} 1,577.000     -0.066     -0.042     -0.031     -0.017      0.003
+{txt}{ralign 12:elast_X1} {...}
+{c |}{...}
+ {res} 1,577.000     -0.214      0.100      0.187      0.270      0.521
+{txt}{ralign 12:rts} {...}
+{c |}{...}
+ {res} 1,577.000      0.953      1.004      1.041      1.067      1.130
+{txt}{hline 13}{c BT}{hline 66}
+
+{com}.         
+.         
+. 
+. **## RTS manually
+. 
+. * Extract coefficient names from e(b)
+. matrix b = e(b)
+{txt}
+{com}. local allvars : colnames b
+{txt}
+{com}. 
+. * Initialize locals
+. local dlnY1
+{txt}
+{com}. local dlnY2
+{txt}
+{com}. 
+. foreach var of local allvars {c -(}
+{txt}  2{com}.     * lnY1 terms
+.     if strpos("`var'", "lnY1") {c -(}
+{txt}  3{com}.         if strpos("`var'", "#") {c -(}
+{txt}  4{com}.             local left = substr("`var'", 1, strpos("`var'", "#") - 1)
+{txt}  5{com}.             local right = substr("`var'", strpos("`var'", "#") + 1, .)
+{txt}  6{com}. 
+.             if "`left'" == "c.lnY1" & "`right'" == "c.lnY1" {c -(}
+{txt}  7{com}.                 local dlnY1 `dlnY1' + 2*_b[`var']*lnY1
+{txt}  8{com}.             {c )-}
+{txt}  9{com}.             else if "`left'" == "c.lnY1" {c -(}
+{txt} 10{com}.                 local other = subinstr("`right'", "c.", "", .)
+{txt} 11{com}.                 local dlnY1 `dlnY1' + _b[`var']*`other'
+{txt} 12{com}.             {c )-}
+{txt} 13{com}.             else if "`right'" == "c.lnY1" {c -(}
+{txt} 14{com}.                 local other = subinstr("`left'", "c.", "", .)
+{txt} 15{com}.                 local dlnY1 `dlnY1' + _b[`var']*`other'
+{txt} 16{com}.             {c )-}
+{txt} 17{com}.         {c )-}
+{txt} 18{com}.         else if "`var'" == "lnY1" {c -(}
+{txt} 19{com}.             local dlnY1 `dlnY1' + _b[`var']
+{txt} 20{com}.         {c )-}
+{txt} 21{com}.     {c )-}
+{txt} 22{com}. 
+.     * lnY2 terms
+.     if strpos("`var'", "lnY2") {c -(}
+{txt} 23{com}.         if strpos("`var'", "#") {c -(}
+{txt} 24{com}.             local left = substr("`var'", 1, strpos("`var'", "#") - 1)
+{txt} 25{com}.             local right = substr("`var'", strpos("`var'", "#") + 1, .)
+{txt} 26{com}. 
+.             if "`left'" == "c.lnY2" & "`right'" == "c.lnY2" {c -(}
+{txt} 27{com}.                 local dlnY2 `dlnY2' + 2*_b[`var']*lnY2
+{txt} 28{com}.             {c )-}
+{txt} 29{com}.             else if "`left'" == "c.lnY2" {c -(}
+{txt} 30{com}.                 local other = subinstr("`right'", "c.", "", .)
+{txt} 31{com}.                 local dlnY2 `dlnY2' + _b[`var']*`other'
+{txt} 32{com}.             {c )-}
+{txt} 33{com}.             else if "`right'" == "c.lnY2" {c -(}
+{txt} 34{com}.                 local other = subinstr("`left'", "c.", "", .)
+{txt} 35{com}.                 local dlnY2 `dlnY2' + _b[`var']*`other'
+{txt} 36{com}.             {c )-}
+{txt} 37{com}.         {c )-}
+{txt} 38{com}.         else if "`var'" == "lnY2" {c -(}
+{txt} 39{com}.             local dlnY2 `dlnY2' + _b[`var']
+{txt} 40{com}.         {c )-}
+{txt} 41{com}.     {c )-}
+{txt} 42{com}. {c )-}
+{txt}
+{com}. 
+. 
+. * Display the results
+. display "Marginal effect of lnY1: `dlnY1'"
+{res}Marginal effect of lnY1: + _b[lnY1] + 2*_b[c.lnY1#c.lnY1]*lnY1 + _b[c.lnY1#c.lnY2]*lnY2 + _b[c.lnY1#c.lnX2]*lnX2 + _b[c.lnY1#c.lnX3]*lnX3 + _b[c.lnY1#c.lnX4]*lnX4
+{txt}
+{com}. display "Marginal effect of lnY2: `dlnY2'"
+{res}Marginal effect of lnY2: + _b[lnY2] + _b[c.lnY1#c.lnY2]*lnY1 + 2*_b[c.lnY2#c.lnY2]*lnY2 + _b[c.lnY2#c.lnX2]*lnX2 + _b[c.lnY2#c.lnX3]*lnX3 + _b[c.lnY2#c.lnX4]*lnX4
+{txt}
+{com}. 
+. 
+. * Temporarily store the expression
+. local temp1 = "`dlnY1'"
+{txt}
+{com}. local temp2 = "`dlnY2'"
+{txt}
+{com}. 
+. * Remove the first "+ " manually
+. if substr("`temp1'", 1, 2) == "+ " {c -(}
+.     local dlnY1 = substr("`temp1'", 3, .)
+. {c )-}
+{txt}
+{com}. if substr("`temp2'", 1, 2) == "+ " {c -(}
+.     local dlnY2 = substr("`temp2'", 3, .)
+. {c )-}
+{txt}
+{com}. 
+. * Display the results
+. display "Marginal effect of lnY1: `dlnY1'"
+{res}Marginal effect of lnY1: _b[lnY1] + 2*_b[c.lnY1#c.lnY1]*lnY1 + _b[c.lnY1#c.lnY2]*lnY2 + _b[c.lnY1#c.lnX2]*lnX2 + _b[c.lnY1#c.lnX3]*lnX3 + _b[c.lnY1#c.lnX4]*lnX4
+{txt}
+{com}. display "Marginal effect of lnY2: `dlnY2'"
+{res}Marginal effect of lnY2: _b[lnY2] + _b[c.lnY1#c.lnY2]*lnY1 + 2*_b[c.lnY2#c.lnY2]*lnY2 + _b[c.lnY2#c.lnX2]*lnX2 + _b[c.lnY2#c.lnX3]*lnX3 + _b[c.lnY2#c.lnX4]*lnX4
+{txt}
+{com}. 
+. 
+. generate elast_Y1_manual = -(`dlnY1') if e(sample)
+{txt}(6,662 missing values generated)
+
+{com}. generate elast_Y2_manual = -(`dlnY2') if e(sample)
+{txt}(6,662 missing values generated)
+
+{com}. 
+. local RTS_expr = "- 1 / ((`dlnY1') + (`dlnY2'))"
+{txt}
+{com}. 
+. predictnl rts_manual = `RTS_expr' if e(sample), se(rts_se)
+{txt}(6,662 missing values generated)
+
+{com}. 
+. summarize elast_Y1_manual elast_Y1 elast_Y2_manual elast_Y2 rts_manual rts
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+elast_Y1_m~l {c |}{res}      1,577     .722717     .121999   .2231594   1.301317
+{txt}{space 4}elast_Y1 {c |}{res}      1,577     .722717     .121999   .2231594   1.301317
+{txt}elast_Y2_m~l {c |}{res}      1,577    .2410844     .107797  -.2876883   .6620186
+{txt}{space 4}elast_Y2 {c |}{res}      1,577    .2410844     .107797  -.2876883   .6620186
+{txt}{space 2}rts_manual {c |}{res}      1,577    1.038153    .0247121   .9531643   1.129716
+{txt}{hline 13}{c +}{hline 57}
+{space 9}rts {c |}{res}      1,577    1.038153    .0247121   .9531643   1.129716
+{txt}
+{com}. 
+. generate rts_lb = rts - ${c -(}critical_value{c )-} * rts_se  if e(sample)
+{txt}(6,662 missing values generated)
+
+{com}. generate rts_ub = rts + ${c -(}critical_value{c )-} * rts_se if e(sample)
+{txt}(6,662 missing values generated)
+
+{com}. generate scale = "" if e(sample)
+{txt}(8,239 missing values generated)
+
+{com}. 
+. replace scale = "Economies of Scale" if rts_lb > 1 & e(sample)
+{txt}variable {bf}{res}scale{sf}{txt} was {bf}{res}str1{sf}{txt} now {bf}{res}str18{sf}
+{txt}(1,315 real changes made)
+
+{com}. replace scale = "Diseconomies of Scale" if rts_ub < 1 & e(sample)
+{txt}variable {bf}{res}scale{sf}{txt} was {bf}{res}str18{sf}{txt} now {bf}{res}str21{sf}
+{txt}(38 real changes made)
+
+{com}. replace scale = "Optimal Scale" if rts_lb < 1 & rts_ub > 1 & e(sample)
+{txt}(224 real changes made)
+
+{com}. 
+. tabulate scale
+
+                {txt}scale {c |}      Freq.     Percent        Cum.
+{hline 22}{c +}{hline 35}
+Diseconomies of Scale {c |}{res}         38        2.41        2.41
+{txt}   Economies of Scale {c |}{res}      1,315       83.39       85.80
+{txt}        Optimal Scale {c |}{res}        224       14.20      100.00
+{txt}{hline 22}{c +}{hline 35}
+                Total {c |}{res}      1,577      100.00
+{txt}
+{com}. 
+. erase "ffiec_excerpt_final.dta"
+{txt}
+{com}. 
+. log close peus_banking_txt
+      {txt}name:  {res}peus_banking_txt
+       {txt}log:  {res}peus_banking_txt.log
+  {txt}log type:  {res}text
+ {txt}closed on:  {res}16 Oct 2026, 10:38:24
+{txt}{.-}
+
+{com}. log close peus_banking_smcl
+      {txt}name:  {res}peus_banking_smcl
+       {txt}log:  {res}peus_banking_smcl.smcl
+  {txt}log type:  {res}smcl
+ {txt}closed on:  {res}16 Oct 2026, 10:38:24
+{txt}{.-}
+{smcl}
+{txt}{sf}{ul off}
