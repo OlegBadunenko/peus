@@ -1,6 +1,6 @@
-The replication package contains the files for book
+# The replication package for
 
-**Productivity and Efficiency Analysis Using Stata**
+## Productivity and Efficiency Analysis Using Stata
 
 > Oleg Badunenko (Brunel University)
 >
@@ -8,4 +8,4 @@ The replication package contains the files for book
 >
 > Valentin Zelenyuk (The University of Queensland)
 
-Volume 1 (click on Vol1 to get the replication files, data, and logs) is ready, while the 2 other volumes are in the progress.
+Volume 1 (click [Vol1](https://github.com/OlegBadunenko/peus/tree/main/Vol1) to get the replication files, data, and logs) is ready, while the 2 other volumes are in the progress.

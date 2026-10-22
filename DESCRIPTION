@@ -1,0 +1,18 @@
+Package: peus
+Type: Package
+Title: Productivity and Efficiency Analysis Using Stata
+Version: 2.0.0
+Authors@R: c(
+    person("Oleg", "Badunenko", , "Oleg.Badunenko@brunel.ac.uk", role = c("aut", "cre"),
+      comment = c(ORCID = "0000-0001-7216-0861")
+    )
+  )
+URL: https://olegbadunenko.github.io/peus, https://olegbadunenko.github.io/peus/
+Maintainer: The package maintainer <Oleg.Badunenko@brunel.ac.uk>
+Description: Replication package for "Productivity and Efficiency Analysis Using Stata"
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+VignetteBuilder: knitr
+RoxygenNote: 7.2.3
+                        

@@ -1,0 +1,38 @@
+title: PEUS
+
+template:
+  params:
+    bootstrap: 5
+    bootswatch: spacelab
+
+authors:
+  Oleg Badunenko:
+    href: https://OlegBadunenko.github.io/
+
+navbar:
+  title: "peus"
+  left:
+    - text: "User Guide"
+      menu:
+        - text: "Volume 1"
+          href: articles/vol1-examples.html
+        - text: "Volume 2"
+          href: articles/vol2-examples.html
+        - text: "Volume 3"
+          href: articles/vol3-examples.html
+    - text: "News/Changelog"
+      href: news/index.html
+
+articles:
+  - title: User Guide
+    desc: >
+      The guide presents the replication code for the book.
+    contents:
+      - vol1-examples
+      - vol2-examples
+      - vol3-examples
+
+home:
+  links:
+    - text: Source Code
+      href: https://github.com/OlegBadunenko/peus
