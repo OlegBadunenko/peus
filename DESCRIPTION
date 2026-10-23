@@ -3,10 +3,16 @@ Type: Package
 Title: Productivity and Efficiency Analysis Using Stata
 Version: 2.0.0
 Authors@R: c(
-    person("Oleg", "Badunenko", , "Oleg.Badunenko@brunel.ac.uk", role = c("aut", "cre"),
+    person("Oleg", "Badunenko", , "oleg.badunenko@proton.me", role = c("aut", "cre"),
       comment = c(ORCID = "0000-0001-7216-0861")
+    ),
+    person("Robin C.", "Sickles", , "rsickles@rice.edu", role = "aut",
+      comment = c(ORCID = "https://orcid.org/0000-0002-5575-7137")
+    ),
+    person("Valentin", "Zelenyuk", , "v.zelenyuk@uq.edu.au", role = "aut",
+      comment = c(ORCID = "0000-0001-6120-4291")
     )
-  )
+  )  
 URL: https://olegbadunenko.github.io/peus, https://olegbadunenko.github.io/peus/
 Maintainer: The package maintainer <Oleg.Badunenko@brunel.ac.uk>
 Description: Replication package for "Productivity and Efficiency Analysis Using Stata"
